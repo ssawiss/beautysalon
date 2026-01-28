@@ -176,6 +176,10 @@
             <button class="close-m" onclick="toggleBooking()">×</button>
             <h2 id="b-title-text" style="font-family: 'Playfair Display'; font-size: 1.8rem; color: var(--botanical-green); margin-bottom: 30px;">Ritual Inquiry</h2>
             <div style="flex:1;">
+                <div style="margin-bottom: 20px;">
+                    <label style="font-size: 0.6rem;">PHONE NUMBER</label>
+                    <input type="tel" placeholder="+212 ..." style="width:100%; padding:10px 0; border:none; border-bottom:1px solid #eee; font-family:inherit; outline:none;">
+                </div>
                 <div style="margin-bottom: 20px;" id="b-cat-wrapper">
                     <label style="font-size: 0.6rem;">CATEGORY</label>
                     <select id="b-cat" style="width:100%; padding:10px 0; border:none; border-bottom:1px solid #eee;" onchange="updateBList()">
@@ -271,5 +275,6 @@
     </script>
 </body>
 </html>
+
 
 
