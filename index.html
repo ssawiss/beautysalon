@@ -3,236 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ELARA STRANDS | The Private Collective</title>
+    <title>ELARA | BOTANICAL DIRECTORY</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Montserrat:wght@100;200;300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
     <style>
         :root {
-            --gold: #C5A059;
-            --pearl: #F7F6F3;
-            --ink: #1A1A1A;
+            --botanical-green: #2D4739;
+            --soft-sage: #F2F5F0;
+            --clay: #D9C5B2;
             --white: #FFFFFF;
+            --text: #1A1A1A;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
         
+        /* Mobile Touch Friendly */
         @media (max-width: 768px) {
             * { cursor: auto !important; }
             #cursor-dot, #cursor-ring { display: none !important; }
         }
 
-        body { background: var(--pearl); color: var(--ink); font-family: 'Montserrat', sans-serif; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+        body { background: var(--soft-sage); color: var(--text); font-family: 'Montserrat', sans-serif; }
 
-        /* --- UI: Cursor & Loader --- */
-        #cursor-dot { position: fixed; top: 0; left: 0; width: 6px; height: 6px; background: var(--gold); border-radius: 50%; pointer-events: none; z-index: 10001; }
-        #cursor-ring { position: fixed; top: 0; left: 0; width: 38px; height: 38px; border: 0.5px solid var(--gold); border-radius: 50%; pointer-events: none; z-index: 10000; margin-top: -16px; margin-left: -16px; }
+        /* --- UI: Components --- */
+        #loader { position: fixed; inset: 0; background: var(--botanical-green); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--white); pointer-events: none;}
+        .loader-brand { font-family: 'Playfair Display', serif; font-size: 1.5rem; letter-spacing: 4px; }
+        .loader-bar { width: 100px; height: 1px; background: rgba(255,255,255,0.2); margin-top: 20px; position: relative; overflow: hidden; }
+        .loader-progress { position: absolute; height: 100%; width: 0%; background: var(--clay); }
 
-        .loader { position: fixed; inset: 0; background: var(--ink); z-index: 10001; display: flex; align-items: center; justify-content: center; }
-        .loader-brand { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; letter-spacing: 12px; color: var(--gold); }
+        nav { position: fixed; top: 0; width: 100%; padding: 20px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(45, 71, 57, 0.1); }
+        .logo { font-family: 'Playfair Display', serif; font-size: clamp(1rem, 4vw, 1.4rem); color: var(--botanical-green); cursor: pointer; }
 
-        /* --- Navigation --- */
-        nav { position: fixed; top: 0; width: 100%; padding: 30px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 900; mix-blend-mode: difference; color: white; }
-        .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; letter-spacing: 4px; }
-        .book-trigger { font-size: 0.6rem; letter-spacing: 3px; border-bottom: 1px solid var(--gold); padding-bottom: 5px; background: none; border: none; color: inherit; }
-
-        /* --- Narrative Sections --- */
-        section { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 0 10%; position: relative; }
-        .hero { background: var(--ink); color: white; overflow: hidden; }
-        .hero-video-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; filter: grayscale(100%); }
+        /* --- Master Landing --- */
+        #landing-page { padding-top: 100px; width: 100%; }
+        .brand-narrative { padding: 80px 10%; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; background: var(--white); }
+        .section-header { text-align: center; padding: 60px 5% 30px; }
+        .directory-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 0 5% 60px; width: 100%; max-width: 1400px; margin: 0 auto; }
         
-        .narrative-box { max-width: 600px; text-align: center; opacity: 0; transform: translateY(40px); }
-        .narrative-box span { font-size: 0.6rem; letter-spacing: 6px; color: var(--gold); text-transform: uppercase; display: block; margin-bottom: 20px; }
-        .narrative-box h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 300; margin-bottom: 25px; }
-        .narrative-box p { font-size: 0.95rem; line-height: 2.2; color: #555; font-weight: 300; }
+        .cat-card { position: relative; height: 380px; overflow: hidden; border-radius: 4px; cursor: pointer; }
+        .cat-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.8s ease; }
+        .cat-card:hover img { transform: scale(1.1); }
+        .cat-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(45,71,57,0.7)); display: flex; flex-direction: column; justify-content: flex-end; padding: 25px; }
+        .cat-overlay h3 { color: white; font-family: 'Playfair Display', serif; font-size: 1.6rem; }
 
-        /* --- Service List --- */
-        .service-list { width: 100%; border-top: 1px solid rgba(0,0,0,0.05); }
-        .service-item { 
-            padding: 45px 0; border-bottom: 1px solid rgba(0,0,0,0.05); 
-            display: flex; justify-content: space-between; align-items: center;
-            transition: 0.4s;
+        /* --- OVERLAY SUB-PAGE --- */
+        #sub-page { 
+            position: fixed; inset: 0; background: var(--white); z-index: 1500; 
+            display: none; flex-direction: column; overflow-y: auto; padding: 100px 5%; 
+            transform: translateY(100%); transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1);
         }
-        .service-item:hover { color: var(--gold); padding-left: 20px; }
-        .service-name { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 300; }
+        #sub-page.active { display: flex; transform: translateY(0); }
+        .back-btn { margin-bottom: 30px; background: none; border: none; cursor: pointer; font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--botanical-green); font-weight: 600; text-align: left; }
+        .items-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; padding-bottom: 50px; }
+        .item-card { background: var(--soft-sage); padding: 30px; border-radius: 4px; text-align: center; cursor: pointer; }
+        .item-img { width: 100%; height: 220px; object-fit: cover; border-radius: 2px; margin-bottom: 20px; }
 
-        /* --- EDITORIAL MODAL --- */
-        #detail-modal {
-            position: fixed; inset: 0; background: rgba(26,26,26,0.98); z-index: 3000;
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0; visibility: hidden; transition: 0.5s;
-        }
-        #detail-modal.active { opacity: 1; visibility: visible; }
+        /* --- Modals & Sidebar --- */
+        .modal { position: fixed; inset: 0; background: rgba(45, 71, 57, 0.95); z-index: 2500; display: none; align-items: center; justify-content: center; padding: 15px; }
+        .modal.active { display: flex; }
+        .modal-body { background: var(--white); width: 100%; max-width: 1000px; display: grid; grid-template-columns: 1fr 1fr; border-radius: 4px; overflow: hidden; position: relative; max-height: 95vh; }
+        .m-info { padding: 40px; display: flex; flex-direction: column; justify-content: center; overflow-y: auto; }
+        .close-m { position: absolute; top: 15px; right: 20px; border: none; background: none; font-size: 1.5rem; color: var(--botanical-green); cursor: pointer; z-index: 100; }
+
+        #booking-sidebar-container { position: fixed; inset: 0; z-index: 3000; visibility: hidden; }
+        #booking-sidebar-container.active { visibility: visible; }
+        .sidebar-overlay { position: absolute; inset: 0; background: rgba(45, 71, 57, 0.4); opacity: 0; transition: opacity 0.6s; }
+        #booking-sidebar-container.active .sidebar-overlay { opacity: 1; }
+        #booking-sidebar { position: absolute; top: 0; right: 0; width: 450px; height: 100vh; background: var(--white); padding: 50px 30px; transform: translateX(100%); transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1); display: flex; flex-direction: column; }
+        #booking-sidebar-container.active #booking-sidebar { transform: translateX(0); }
+
+        .btn-green { background: var(--botanical-green); color: white; border: none; padding: 18px; font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; width: 100%; cursor: pointer; margin-top: 15px; }
+        .qty-controls { display: flex; align-items: center; gap: 15px; margin: 15px 0; border: 1px solid #eee; width: fit-content; padding: 5px 12px; border-radius: 50px; }
         
-        .modal-card {
-            background: var(--white); width: 90%; max-width: 850px; display: flex;
-            position: relative; overflow: hidden; transform: translateY(30px); transition: 0.6s var(--gold);
+        /* --- Footer --- */
+        footer { background: var(--botanical-green); color: var(--white); padding: 80px 5% 40px; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 40px; margin-bottom: 30px; }
+        .footer-logo { font-family: 'Playfair Display'; font-size: 1.5rem; margin-bottom: 15px; }
+        .footer-col h4 { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--clay); margin-bottom: 20px; }
+        .footer-col ul { list-style: none; opacity: 0.7; font-size: 0.85rem; line-height: 2; }
+        .footer-bottom { display: flex; justify-content: space-between; font-size: 0.65rem; opacity: 0.5; }
+
+        /* --- Cursor --- */
+        #cursor-dot { position: fixed; top: 0; left: 0; width: 6px; height: 6px; background: var(--botanical-green); border-radius: 50%; pointer-events: none; z-index: 10001; }
+        #cursor-ring { position: fixed; top: 0; left: 0; width: 38px; height: 38px; border: 0.5px solid var(--botanical-green); border-radius: 50%; pointer-events: none; z-index: 10000; margin-top: -16px; margin-left: -16px; }
+
+        /* Responsive Fixes */
+        @media (max-width: 768px) {
+            .brand-narrative { grid-template-columns: 1fr; padding: 50px 5%; }
+            .directory-grid { grid-template-columns: 1fr; }
+            .modal-body { grid-template-columns: 1fr; overflow-y: auto; }
+            .modal-body div:first-child { height: 250px !important; min-height: 250px !important; }
+            #booking-sidebar { width: 100%; }
+            .footer-grid { grid-template-columns: 1fr; text-align: center; }
+            .footer-bottom { flex-direction: column; gap: 10px; text-align: center; }
         }
-        #detail-modal.active .modal-card { transform: translateY(0); }
-
-        .modal-img { width: 45%; height: 500px; overflow: hidden; }
-        .modal-img img { width: 100%; height: 100%; object-fit: cover; }
-        .modal-content { width: 55%; padding: 50px; display: flex; flex-direction: column; justify-content: center; }
-        .modal-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 2.8rem; color: var(--gold); margin-bottom: 20px; font-weight: 300; }
-        .modal-content p { font-size: 0.9rem; line-height: 2; color: #666; font-weight: 300; }
-        .close-modal { position: absolute; top: 20px; right: 30px; font-size: 2.5rem; font-weight: 100; background: none; border: none; }
-
-        /* --- Booking Overlay --- */
-        #booking-overlay {
-            position: fixed; inset: 0; background: var(--pearl); z-index: 2000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transform: translateY(100%); visibility: hidden;
-        }
-        #booking-overlay.active { transform: translateY(0); visibility: visible; transition: transform 0.8s cubic-bezier(0.7, 0, 0.3, 1); }
-
     </style>
 </head>
 <body>
 
+    <div id="loader">
+        <div class="loader-brand">ELARA BOTANIQUE</div>
+        <div class="loader-bar"><div class="loader-progress"></div></div>
+    </div>
+
     <div id="cursor-dot"></div>
     <div id="cursor-ring"></div>
 
-    <div class="loader"><div class="loader-brand">ELARA STRANDS</div></div>
-
-    <div id="detail-modal" onclick="closeModal()">
-        <div class="modal-card" onclick="event.stopPropagation()">
-            <button class="close-modal" onclick="closeModal()">&times;</button>
-            <div class="modal-img"><img src="" id="m-img"></div>
-            <div class="modal-content">
-                <h3 id="m-title"></h3>
-                <p id="m-desc"></p>
-                <button class="book-trigger" style="margin-top: 30px; align-self: flex-start;" onclick="toggleBooking(); closeModal();">REQUEST TREATMENT</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="booking-overlay">
-        <button class="close-modal" style="color: black;" onclick="toggleBooking()">&times;</button>
-        <div class="narrative-box" style="opacity: 1; transform: none;">
-            <h1 style="font-family: 'Cormorant Garamond'; font-size: 3.5rem; font-weight: 300;">An Invitation.</h1>
-            <p style="margin-top: 20px; color: #666;">Our concierge will contact you within one business cycle.</p>
-            <div style="margin-top: 40px; display: flex; flex-direction: column; gap: 20px; width: 100%;">
-                <input type="text" placeholder="NAME" style="background: none; border: none; border-bottom: 1px solid #ccc; padding: 15px 0; font-family: 'Cormorant Garamond'; font-size: 1.5rem; outline: none; width: 100%;">
-                <button style="background: var(--ink); color: white; padding: 20px; font-size: 0.6rem; letter-spacing: 4px; border: none; width: 100%;">SUBMIT REQUEST</button>
-            </div>
-        </div>
-    </div>
-
     <nav>
-        <div class="logo">ELARA</div>
-        <button class="book-trigger" onclick="toggleBooking()">REQUEST ENTRY</button>
+        <div class="logo" onclick="goHome()">ELARA BOTANIQUE</div>
+        <div style="font-size: 0.55rem; letter-spacing: 1.5px; font-weight: 600; color: var(--botanical-green); cursor:pointer;" onclick="toggleBooking('general')">RESERVE RITUAL</div>
     </nav>
 
-    <main>
-        <section class="hero">
-            <video autoplay muted loop playsinline class="hero-video-bg">
-                <source src="https://assets.mixkit.co/videos/preview/mixkit-hand-moving-slowly-over-soft-silk-44170-large.mp4" type="video/mp4">
-            </video>
-            <div class="hero-title" style="z-index: 10;">
-                <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 8vw; font-weight: 300; text-align: center;">Beyond the<span>Noise.</span></h1>
+    <main id="landing-page">
+        <section class="brand-narrative">
+            <div class="narrative-image"><img src="assets/images/main.jpg" style="width: 100%; border-radius: 4px;"></div>
+            <div class="narrative-text">
+                <span style="font-size: 0.6rem; letter-spacing: 3px; color: var(--clay); font-weight: 600;">HERITAGE</span>
+                <h2 style="font-family:'Playfair Display'; font-size: clamp(2rem, 5vw, 3rem); color: var(--botanical-green); margin: 15px 0;">Rooted in Nature.</h2>
+                <p style="font-size: 0.9rem; line-height: 1.8; color: #555;">Since 1959, we have decoded the genius of plants to create high-performance care. Every ritual at Elara is a pure extension of the earth's vitality.</p>
             </div>
         </section>
 
-        <section>
-            <div class="narrative-box scroll-reveal">
-                <span>The Sanctuary</span>
-                <h2>We believe beauty begins in the absence of distraction.</h2>
-                <p>An exclusive environment where time slows down. Your transformation is our only priority.</p>
-            </div>
-        </section>
+        <div class="section-header"><h2>Rituals & Care</h2></div>
+        <div class="directory-grid" id="serv-grid"></div>
 
-        <section style="background: var(--white);">
-            <div style="width: 100%;">
-                <div class="narrative-box scroll-reveal" style="margin: 0 auto 60px;">
-                    <span>The Collection</span>
-                    <h2>A Curriculum of Form.</h2>
+        <div class="section-header"><h2>Boutique du Jardin</h2></div>
+        <div class="directory-grid" id="prod-grid"></div>
+
+        <footer>
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-logo">ELARA</div>
+                    <p style="font-size: 0.8rem; opacity: 0.6;">Botanical excellence from La Gacilly, France.</p>
                 </div>
-                <div class="service-list">
-                    <div class="service-item" onclick="openModal('Structure', 'Architectural tailoring designed to harmonize with your unique bone structure.', 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=800')">
-                        <div class="service-name">Structure</div>
-                        <span style="font-size: 0.7rem; letter-spacing: 2px;">90 MINS</span>
-                    </div>
-                    <div class="service-item" onclick="openModal('Luminescence', 'Hand-painted dimensional color that captures and reflects natural light.', 'https://images.unsplash.com/photo-1634449571010-02389ed0f9b0?q=80&w=800')">
-                        <div class="service-name">Luminescence</div>
-                        <span style="font-size: 0.7rem; letter-spacing: 2px;">180 MINS</span>
-                    </div>
-                    <div class="service-item" onclick="openModal('Alchemy', 'The ultimate high-fashion finish. Effortless, polished, and refined.', 'assets/images/shamblen-studios-xwM61TPMlYk-unsplash.jpg')">
-                        <div class="service-name">Alchemy</div>
-                        <span style="font-size: 0.7rem; letter-spacing: 2px;">45 MINS</span>
-                    </div>
+                <div class="footer-col">
+                    <h4>Categories</h4>
+                    <ul><li>Face Care</li><li>Body Care</li><li>Apothecary</li></ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul><li>Instagram</li><li>LinkedIn</li><li>E-mail</li></ul>
                 </div>
             </div>
-        </section>
-
-        <section>
-            <div class="narrative-box scroll-reveal">
-                <span>The Reveal</span>
-                <h2>Confidence is the final masterpiece.</h2>
-                <p>The reveal is not just in the mirror—it’s in how you move through the world.</p>
-                <button class="book-trigger" style="margin-top: 40px; font-size: 0.8rem;" onclick="toggleBooking()">JOIN THE COLLECTIVE</button>
+            <div class="footer-bottom">
+                <p>&copy; 2026 ELARA BOTANIQUE</p>
+                <p>LA GACILLY, BRETAGNE</p>
             </div>
-        </section>
+        </footer>
     </main>
 
+    <div id="sub-page">
+        <button class="back-btn" onclick="goHome()">← Back to Garden</button>
+        <h2 id="sub-title" style="font-family: 'Playfair Display'; font-size: clamp(2rem, 5vw, 3.5rem); margin-bottom: 40px; color: var(--botanical-green);"></h2>
+        <div class="items-grid" id="sub-container"></div>
+    </div>
+
+    <div id="modal" class="modal" onclick="closeM()">
+        <div class="modal-body" onclick="event.stopPropagation()">
+            <button class="close-m" onclick="closeM()">×</button>
+            <div style="height: 100%; min-height: 400px;"><img src="" id="m-img" style="width:100%; height:100%; object-fit:cover;"></div>
+            <div class="m-info" id="m-content-box"></div>
+        </div>
+    </div>
+
+    <div id="booking-sidebar-container" onclick="toggleBooking()">
+        <div class="sidebar-overlay"></div>
+        <div id="booking-sidebar" onclick="event.stopPropagation()">
+            <button class="close-m" onclick="toggleBooking()">×</button>
+            <h2 id="b-title-text" style="font-family: 'Playfair Display'; font-size: 1.8rem; color: var(--botanical-green); margin-bottom: 30px;">Ritual Inquiry</h2>
+            <div style="flex:1;">
+                <div style="margin-bottom: 20px;" id="b-cat-wrapper">
+                    <label style="font-size: 0.6rem;">CATEGORY</label>
+                    <select id="b-cat" style="width:100%; padding:10px 0; border:none; border-bottom:1px solid #eee;" onchange="updateBList()">
+                        <option value="">Select Category</option><option>Face</option><option>Body</option><option>Hair</option><option>Nails</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 20px;"><label style="font-size: 0.6rem;">RITUAL</label><select id="b-serv" style="width:100%; padding:10px 0; border:none; border-bottom:1px solid #eee;"></select></div>
+                <div style="margin-bottom: 20px;"><label style="font-size: 0.6rem;">DATE</label><input type="date" style="width:100%; padding:10px 0; border:none; border-bottom:1px solid #eee;"></div>
+            </div>
+            <button class="btn-green" onclick="alert('Sent.')">Confirm Request</button>
+        </div>
+    </div>
+
     <script>
-        const lenis = new Lenis({ duration: 1.4 });
+        const lenis = new Lenis({ duration: 1.2 });
         function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
         requestAnimationFrame(raf);
 
-        // Preloader Logic
-        window.onload = () => {
-            gsap.to(".loader", { y: "-100%", duration: 1.2, ease: "expo.inOut", delay: 0.8 });
+        const database = {
+            'Face': [{ name: 'Chamomile Soothe', desc: 'Calming plant ritual.', img: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=800' }, { name: 'Hydra-Oxygen', desc: 'Deep cellular treatment.', img: 'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?q=80&w=800' }],
+            'Body': [{ name: 'Arnica Recovery', desc: 'Tension release.', img: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=800' }, { name: 'Lavender Sleep', desc: 'Aromatherapy.', img: 'assets/images/aromatherapy.jpg' }],
+            'Hair': [{ name: 'Alchemy Blowout', desc: 'Signature finish.', img: 'assets/images/shamblen-studios-xwM61TPMlYk-unsplash.jpg' }, { name: 'Silk Protein Ritual', desc: 'Internal restoration.', img: 'https://images.unsplash.com/photo-1560869713-7d0a29430803?q=80&w=800' }],
+            'Nails': [{ name: 'Pure Manicure', desc: 'Hand ritual.', img: 'assets/images/manicure.jpg' }, { name: 'Botanical Pedicure', desc: 'Foot soak.', img: 'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?q=80&w=800' }],
+            'Skincare': [{ name: 'Hydra Végétal', desc: 'Gel cream.', price: '$32', img: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=600' }, { name: 'Filler Végétal', desc: 'Plumping care.', price: '$42', img: 'https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?q=80&w=600' }],
+            'Makeup': [{ name: 'Metamorphose Mascara', desc: 'Volume.', price: '$22', img: 'assets/images/mascara.jpg' }, { name: 'Grand Rouge', desc: 'Satin lipstick.', price: '$24', img: 'assets/images/lipstick.jpg' }],
+            'Perfumes': [{ name: 'Evidence Essence', desc: 'Luminous chypre.', price: '$55', img: 'assets/images/perfumes.jpg' }, { name: 'Sel dAzur', desc: 'Mediterranean.', price: '$60', img: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?q=80&w=600' }]
         };
 
-        // --- Narrative Entrance Animations ---
-        gsap.registerPlugin(ScrollTrigger);
+        function renderGrids() {
+            const servs = ['Face', 'Body', 'Hair', 'Nails'];
+            const prods = ['Skincare', 'Makeup', 'Perfumes'];
+            document.getElementById('serv-grid').innerHTML = servs.map(c => `<div class="cat-card" onclick="showCat('${c}')"><img src="${database[c][0].img}"><div class="cat-overlay"><h3>${c}</h3></div></div>`).join('');
+            document.getElementById('prod-grid').innerHTML = prods.map(c => `<div class="cat-card" onclick="showCat('${c}')"><img src="${database[c][0].img}"><div class="cat-overlay"><h3>${c}</h3></div></div>`).join('');
+        }
 
-        gsap.utils.toArray('.scroll-reveal').forEach(box => {
-            gsap.to(box, {
-                scrollTrigger: {
-                    trigger: box,
-                    start: "top 85%",
-                    toggleActions: "play none none none"
-                },
-                opacity: 1,
-                y: 0,
-                duration: 1.5,
-                ease: "power3.out"
-            });
-        });
-
-        // --- Editorial Modal Logic ---
-        function openModal(title, desc, img) {
-            document.getElementById('m-title').innerText = title;
-            document.getElementById('m-desc').innerText = desc;
-            document.getElementById('m-img').src = img;
-            document.getElementById('detail-modal').classList.add('active');
+        function showCat(cat) {
+            document.getElementById('sub-title').innerText = cat;
+            document.getElementById('sub-container').innerHTML = database[cat].map(item => `
+                <div class="item-card" onclick="openItemModal('${cat}', '${item.name}')">
+                    <img src="${item.img}" class="item-img">
+                    <h4>${item.name}</h4>
+                    <span style="font-size:0.6rem; letter-spacing:1px; color:var(--botanical-green)">DISCOVER</span>
+                </div>
+            `).join('');
+            const subPage = document.getElementById('sub-page');
+            subPage.style.display = 'flex';
+            setTimeout(() => subPage.classList.add('active'), 10);
             lenis.stop();
         }
 
-        function closeModal() {
-            document.getElementById('detail-modal').classList.remove('active');
-            lenis.start();
+        function goHome() {
+            const subPage = document.getElementById('sub-page');
+            subPage.classList.remove('active');
+            setTimeout(() => { subPage.style.display = 'none'; lenis.start(); }, 600);
         }
 
-        function toggleBooking() {
-            const overlay = document.getElementById('booking-overlay');
-            overlay.classList.toggle('active');
-            overlay.classList.contains('active') ? lenis.stop() : lenis.start();
+        function openItemModal(cat, name) {
+            const item = database[cat].find(i => i.name === name);
+            const isProd = ['Skincare', 'Makeup', 'Perfumes'].includes(cat);
+            document.getElementById('m-img').src = item.img;
+            let html = `<h3 style="font-family:'Playfair Display'; font-size:2.2rem; color:var(--botanical-green);">${item.name}</h3><p style="margin:15px 0; color:#666; font-size:0.9rem;">${item.desc}</p>`;
+            if (isProd) {
+                html += `<p style="font-weight:600;">${item.price}</p><div class="qty-controls"><span>Qty</span><button onclick="changeQty(-1)">-</button><span id="qty">1</span><button onclick="changeQty(1)">+</button></div><button class="btn-green" onclick="alert('Added')">Add to Bag</button>`;
+            } else {
+                html += `<button class="btn-green" onclick="closeM(); toggleBooking('specific', '${item.name}', '${cat}')">Book Ritual</button>`;
+            }
+            document.getElementById('m-content-box').innerHTML = html;
+            document.getElementById('modal').classList.add('active');
         }
 
-        // --- Desktop Cursor ---
-        if (window.innerWidth > 768) {
-            const dot = document.getElementById('cursor-dot');
-            const ring = document.getElementById('cursor-ring');
-            document.addEventListener('mousemove', (e) => {
-                gsap.set(dot, { x: e.clientX, y: e.clientY });
-                gsap.to(ring, { x: e.clientX, y: e.clientY, duration: 0.2 });
-            });
+        function changeQty(v) { let q = document.getElementById('qty'); if(q) q.innerText = Math.max(1, parseInt(q.innerText) + v); }
+
+        function toggleBooking(mode = 'general', name = '', cat = '') {
+            const container = document.getElementById('booking-sidebar-container');
+            if (mode === 'specific') {
+                document.getElementById('b-cat').value = cat;
+                updateBList();
+                document.getElementById('b-serv').value = name;
+            }
+            container.classList.toggle('active');
+            container.classList.contains('active') ? lenis.stop() : lenis.start();
         }
+
+        function updateBList() {
+            const cat = document.getElementById('b-cat').value;
+            const bServ = document.getElementById('b-serv');
+            if (cat && database[cat]) bServ.innerHTML = database[cat].map(i => `<option>${i.name}</option>`).join('');
+        }
+
+        function closeM() { document.getElementById('modal').classList.remove('active'); }
+        window.onload = () => { renderGrids(); gsap.to(".loader-progress", {width:"100%", duration:1}).then(() => gsap.to("#loader", {y:"-100%", duration:0.6})); };
+        document.addEventListener('mousemove', (e) => { gsap.set("#cursor-dot", {x:e.clientX, y:e.clientY}); gsap.to("#cursor-ring", {x:e.clientX, y:e.clientY, duration:0.2}); });
     </script>
 </body>
 </html>
