@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELARA STRANDS | The Private Collective</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Montserrat:wght@100;200;300;400&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        :root {
+            --gold: #C5A059;
+            --pearl: #F7F6F3;
+            --ink: #1A1A1A;
+            --white: #FFFFFF;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        
+        @media (max-width: 768px) {
+            * { cursor: auto !important; }
+            #cursor-dot, #cursor-ring { display: none !important; }
+        }
+
+        body { background: var(--pearl); color: var(--ink); font-family: 'Montserrat', sans-serif; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+        /* --- UI: Cursor & Loader --- */
+        #cursor-dot { position: fixed; top: 0; left: 0; width: 6px; height: 6px; background: var(--gold); border-radius: 50%; pointer-events: none; z-index: 10001; }
+        #cursor-ring { position: fixed; top: 0; left: 0; width: 38px; height: 38px; border: 0.5px solid var(--gold); border-radius: 50%; pointer-events: none; z-index: 10000; margin-top: -16px; margin-left: -16px; }
+
+        .loader { position: fixed; inset: 0; background: var(--ink); z-index: 10001; display: flex; align-items: center; justify-content: center; }
+        .loader-brand { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; letter-spacing: 12px; color: var(--gold); }
+
+        /* --- Navigation --- */
+        nav { position: fixed; top: 0; width: 100%; padding: 30px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 900; mix-blend-mode: difference; color: white; }
+        .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; letter-spacing: 4px; }
+        .book-trigger { font-size: 0.6rem; letter-spacing: 3px; border-bottom: 1px solid var(--gold); padding-bottom: 5px; background: none; border: none; color: inherit; }
+
+        /* --- Narrative Sections --- */
+        section { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 0 10%; position: relative; }
+        .hero { background: var(--ink); color: white; overflow: hidden; }
+        .hero-video-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; filter: grayscale(100%); }
+        
+        .narrative-box { max-width: 600px; text-align: center; opacity: 0; transform: translateY(40px); }
+        .narrative-box span { font-size: 0.6rem; letter-spacing: 6px; color: var(--gold); text-transform: uppercase; display: block; margin-bottom: 20px; }
+        .narrative-box h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 300; margin-bottom: 25px; }
+        .narrative-box p { font-size: 0.95rem; line-height: 2.2; color: #555; font-weight: 300; }
+
+        /* --- Service List --- */
+        .service-list { width: 100%; border-top: 1px solid rgba(0,0,0,0.05); }
+        .service-item { 
+            padding: 45px 0; border-bottom: 1px solid rgba(0,0,0,0.05); 
+            display: flex; justify-content: space-between; align-items: center;
+            transition: 0.4s;
+        }
+        .service-item:hover { color: var(--gold); padding-left: 20px; }
+        .service-name { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 300; }
+
+        /* --- EDITORIAL MODAL --- */
+        #detail-modal {
+            position: fixed; inset: 0; background: rgba(26,26,26,0.98); z-index: 3000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: 0.5s;
+        }
+        #detail-modal.active { opacity: 1; visibility: visible; }
+        
+        .modal-card {
+            background: var(--white); width: 90%; max-width: 850px; display: flex;
+            position: relative; overflow: hidden; transform: translateY(30px); transition: 0.6s var(--gold);
+        }
+        #detail-modal.active .modal-card { transform: translateY(0); }
+
+        .modal-img { width: 45%; height: 500px; overflow: hidden; }
+        .modal-img img { width: 100%; height: 100%; object-fit: cover; }
+        .modal-content { width: 55%; padding: 50px; display: flex; flex-direction: column; justify-content: center; }
+        .modal-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 2.8rem; color: var(--gold); margin-bottom: 20px; font-weight: 300; }
+        .modal-content p { font-size: 0.9rem; line-height: 2; color: #666; font-weight: 300; }
+        .close-modal { position: absolute; top: 20px; right: 30px; font-size: 2.5rem; font-weight: 100; background: none; border: none; }
+
+        /* --- Booking Overlay --- */
+        #booking-overlay {
+            position: fixed; inset: 0; background: var(--pearl); z-index: 2000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transform: translateY(100%); visibility: hidden;
+        }
+        #booking-overlay.active { transform: translateY(0); visibility: visible; transition: transform 0.8s cubic-bezier(0.7, 0, 0.3, 1); }
+
+    </style>
+</head>
+<body>
+
+    <div id="cursor-dot"></div>
+    <div id="cursor-ring"></div>
+
+    <div class="loader"><div class="loader-brand">ELARA STRANDS</div></div>
+
+    <div id="detail-modal" onclick="closeModal()">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+            <div class="modal-img"><img src="" id="m-img"></div>
+            <div class="modal-content">
+                <h3 id="m-title"></h3>
+                <p id="m-desc"></p>
+                <button class="book-trigger" style="margin-top: 30px; align-self: flex-start;" onclick="toggleBooking(); closeModal();">REQUEST TREATMENT</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="booking-overlay">
+        <button class="close-modal" style="color: black;" onclick="toggleBooking()">&times;</button>
+        <div class="narrative-box" style="opacity: 1; transform: none;">
+            <h1 style="font-family: 'Cormorant Garamond'; font-size: 3.5rem; font-weight: 300;">An Invitation.</h1>
+            <p style="margin-top: 20px; color: #666;">Our concierge will contact you within one business cycle.</p>
+            <div style="margin-top: 40px; display: flex; flex-direction: column; gap: 20px; width: 100%;">
+                <input type="text" placeholder="NAME" style="background: none; border: none; border-bottom: 1px solid #ccc; padding: 15px 0; font-family: 'Cormorant Garamond'; font-size: 1.5rem; outline: none; width: 100%;">
+                <button style="background: var(--ink); color: white; padding: 20px; font-size: 0.6rem; letter-spacing: 4px; border: none; width: 100%;">SUBMIT REQUEST</button>
+            </div>
+        </div>
+    </div>
+
+    <nav>
+        <div class="logo">ELARA</div>
+        <button class="book-trigger" onclick="toggleBooking()">REQUEST ENTRY</button>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <video autoplay muted loop playsinline class="hero-video-bg">
+                <source src="https://assets.mixkit.co/videos/preview/mixkit-hand-moving-slowly-over-soft-silk-44170-large.mp4" type="video/mp4">
+            </video>
+            <div class="hero-title" style="z-index: 10;">
+                <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 8vw; font-weight: 300; text-align: center;">Beyond the<span>Noise.</span></h1>
+            </div>
+        </section>
+
+        <section>
+            <div class="narrative-box scroll-reveal">
+                <span>The Sanctuary</span>
+                <h2>We believe beauty begins in the absence of distraction.</h2>
+                <p>An exclusive environment where time slows down. Your transformation is our only priority.</p>
+            </div>
+        </section>
+
+        <section style="background: var(--white);">
+            <div style="width: 100%;">
+                <div class="narrative-box scroll-reveal" style="margin: 0 auto 60px;">
+                    <span>The Collection</span>
+                    <h2>A Curriculum of Form.</h2>
+                </div>
+                <div class="service-list">
+                    <div class="service-item" onclick="openModal('Structure', 'Architectural tailoring designed to harmonize with your unique bone structure.', 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=800')">
+                        <div class="service-name">Structure</div>
+                        <span style="font-size: 0.7rem; letter-spacing: 2px;">90 MINS</span>
+                    </div>
+                    <div class="service-item" onclick="openModal('Luminescence', 'Hand-painted dimensional color that captures and reflects natural light.', 'https://images.unsplash.com/photo-1634449571010-02389ed0f9b0?q=80&w=800')">
+                        <div class="service-name">Luminescence</div>
+                        <span style="font-size: 0.7rem; letter-spacing: 2px;">180 MINS</span>
+                    </div>
+                    <div class="service-item" onclick="openModal('Alchemy', 'The ultimate high-fashion finish. Effortless, polished, and refined.', 'assets/images/shamblen-studios-xwM61TPMlYk-unsplash.jpg')">
+                        <div class="service-name">Alchemy</div>
+                        <span style="font-size: 0.7rem; letter-spacing: 2px;">45 MINS</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="narrative-box scroll-reveal">
+                <span>The Reveal</span>
+                <h2>Confidence is the final masterpiece.</h2>
+                <p>The reveal is not just in the mirror—it’s in how you move through the world.</p>
+                <button class="book-trigger" style="margin-top: 40px; font-size: 0.8rem;" onclick="toggleBooking()">JOIN THE COLLECTIVE</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const lenis = new Lenis({ duration: 1.4 });
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+        requestAnimationFrame(raf);
+
+        // Preloader Logic
+        window.onload = () => {
+            gsap.to(".loader", { y: "-100%", duration: 1.2, ease: "expo.inOut", delay: 0.8 });
+        };
+
+        // --- Narrative Entrance Animations ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.utils.toArray('.scroll-reveal').forEach(box => {
+            gsap.to(box, {
+                scrollTrigger: {
+                    trigger: box,
+                    start: "top 85%",
+                    toggleActions: "play none none none"
+                },
+                opacity: 1,
+                y: 0,
+                duration: 1.5,
+                ease: "power3.out"
+            });
+        });
+
+        // --- Editorial Modal Logic ---
+        function openModal(title, desc, img) {
+            document.getElementById('m-title').innerText = title;
+            document.getElementById('m-desc').innerText = desc;
+            document.getElementById('m-img').src = img;
+            document.getElementById('detail-modal').classList.add('active');
+            lenis.stop();
+        }
+
+        function closeModal() {
+            document.getElementById('detail-modal').classList.remove('active');
+            lenis.start();
+        }
+
+        function toggleBooking() {
+            const overlay = document.getElementById('booking-overlay');
+            overlay.classList.toggle('active');
+            overlay.classList.contains('active') ? lenis.stop() : lenis.start();
+        }
+
+        // --- Desktop Cursor ---
+        if (window.innerWidth > 768) {
+            const dot = document.getElementById('cursor-dot');
+            const ring = document.getElementById('cursor-ring');
+            document.addEventListener('mousemove', (e) => {
+                gsap.set(dot, { x: e.clientX, y: e.clientY });
+                gsap.to(ring, { x: e.clientX, y: e.clientY, duration: 0.2 });
+            });
+        }
+    </script>
+</body>
+</html>
